@@ -1,0 +1,19 @@
+.P-GPHeaderBar {
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+.P-CPHeaderBar {
+    margin-top: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--background-modifier-accent);
+}
+.P-CPTooltip {
+    white-space: pre-wrap;
+}
+.P-GRScroller,
+.P-CRScroller {
+    padding-top: 5px;
+}
+.P-GPScroller {
+    padding-top: 15px;
+}
