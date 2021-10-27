@@ -16,7 +16,7 @@ const TabBar = getModule(m => m.displayName === 'TabBar');
 const GuildRole = getModule(m => m.displayName === 'GuildRole');
 
 const { generateChannelPermissionSpec } = getModule(m => m.generateGuildPermissionSpec && m.generateChannelPermissionSpec);
-const { getChannel } = getModule(m => m.getChannel);
+const { getChannel } = getModule(m => m.getChannel && m.hasChannel);
 
 const { empty, emptyIconGuilds, emptyText } = getModule('empty', 'emptyIcon');
 const { title } = getModule('title', 'caret');
