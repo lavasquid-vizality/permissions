@@ -34,14 +34,14 @@ export default class extends Plugin {
 
       return res;
     });
-    patch(getModule(m => m.default?.displayName === 'ChannelListTextChannelContextMenu' && m.default.name === 'I' && !String(m.default).includes('includeTopic')), 'default', (args, res) => {
+    patch(getModule(m => m.default?.displayName === 'ChannelListTextChannelContextMenu' && m.default.name === 'O'), 'default', (args, res) => {
       const { guild, channel } = args[0];
 
       findInReactTree(res.props.children, m => m.children?.[m.children.length - 1]?.props.id === 'channel-notifications').children.push(<MenuItem action={() => open(() => <ChannelPermissionsModal guild={guild} channel={channel} description={this.settings.get('ChannelPermissionDescription', defaultSettings.ChannelPermissionDescription)} />)} id={'channel-permissions'} label={'View Permissions'} />);
 
       return res;
     });
-    patch(getModule(m => m.default?.displayName === 'ChannelListVoiceChannelContextMenu' && m.default.name === 'A'), 'default', (args, res) => {
+    patch(getModule(m => m.default?.displayName === 'ChannelListVoiceChannelContextMenu' && m.default.name === 'b'), 'default', (args, res) => {
       const { guild, channel } = args[0];
 
       findInReactTree(res.props.children, m => m.children?.[0].props.id === 'hide-voice-names').children.push(<MenuItem action={() => open(() => <ChannelPermissionsModal guild={guild} channel={channel} description={this.settings.get('ChannelPermissionDescription', defaultSettings.ChannelPermissionDescription)} />)} id={'channel-permissions'} label={'View Permissions'} />);
