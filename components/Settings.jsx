@@ -1,19 +1,19 @@
 import React, { memo } from 'react';
 import { SwitchItem } from '@vizality/components/settings';
 
-import { defaultSettings } from '../constants';
+import { DefaultSettings } from '../constants';
 
 export default memo(({ getSetting, updateSetting, toggleSetting }) => {
   return <>
     <SwitchItem
-      value={getSetting('GuildPermissionDescription', defaultSettings.GuildPermissionDescription)}
+      value={getSetting('GuildPermissionDescription', DefaultSettings.GuildPermissionDescription)}
       onChange={() => toggleSetting('GuildPermissionDescription')}
     >
       {'Guild Permission Description'}
     </SwitchItem>
     <SwitchItem
       description={'Includes all channel types and categories'}
-      value={getSetting('ChannelPermissionDescription', defaultSettings.ChannelPermissionDescription)}
+      value={getSetting('ChannelPermissionDescription', DefaultSettings.ChannelPermissionDescription)}
       onChange={() => toggleSetting('ChannelPermissionDescription')}
     >
       {'Channel Permission Description'}
