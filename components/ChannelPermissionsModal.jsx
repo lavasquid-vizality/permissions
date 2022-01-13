@@ -1,11 +1,14 @@
 import { isEqual } from 'lodash';
 import React, { memo, useState, useEffect } from 'react';
-import { Modal, OverflowTooltip } from '@vizality/components';
+import { OverflowTooltip } from '@vizality/components';
 import { getModule } from '@vizality/webpack';
 const { object: { isEmptyObject }, time: { sleep } } = require('@vizality/util');
 
 import DynamicAnimatedAvatar from './DynamicAnimatedAvatar';
 
+import { Class } from '../constants';
+
+const Modal = getModule(m => m.ModalRoot);
 const PermissionsForm = getModule(m => m.displayName === 'PermissionsForm');
 const Flex = getModule(m => m.displayName === 'Flex');
 const { AdvancedScrollerThin } = getModule(m => m.AdvancedScrollerThin);
@@ -18,23 +21,25 @@ const GuildRole = getModule(m => m.displayName === 'GuildRole');
 const { generateChannelPermissionSpec } = getModule(m => m.generateGuildPermissionSpec && m.generateChannelPermissionSpec);
 const { getChannel } = getModule(m => m.getChannel && m.hasChannel);
 
-const { empty, emptyIconGuilds, emptyText } = getModule('empty', 'emptyIcon');
 const { title } = getModule('title', 'caret');
 const { card } = getModule(m => m.card && m.label && !m.channelContainer);
 const { role } = getModule('role', 'lock');
+const { icon } = getModule(m => m.icon && m.title && Object.keys(m).length === 2);
 const { marginBottom40 } = getModule('marginBottom40');
-const { infoScroller } = getModule('infoScroller');
 const { layoutStyle } = getModule('layoutStyle');
 
-export default memo(({ guild, channel, description }) => {
+export default memo(({ transitionState, guild, channel, description }) => {
+  const { empty, emptyIconGuilds, emptyText } = getModule('empty', 'emptyIcon') ?? Class.empty;
+  const { infoScroller } = getModule('infoScroller') ?? Class.infoScroller;
+
   const PermissionOverwrites = channel.permissionOverwrites;
   if (isEmptyObject(PermissionOverwrites)) {
-    return <Modal size={Modal.Sizes.MEDIUM}>
+    return <Modal.ModalRoot transitionState={transitionState} size={Modal.ModalSize.MEDIUM}>
       <div className={empty}>
         <div className={emptyIconGuilds}></div>
         <div className={emptyText}>{'No Permission Overwrites'}</div>
       </div>
-    </Modal>;
+    </Modal.ModalRoot>;
   }
 
   useEffect(() => {
@@ -57,6 +62,7 @@ export default memo(({ guild, channel, description }) => {
       }
 
       document.querySelectorAll(`.P-CRScroller .${role}`).forEach(role => role.style.setProperty('box-sizing', 'border-box'));
+      document.querySelectorAll(`.P-CPScroller .${icon}`).forEach(icon => icon.style.setProperty('display', 'none'));
     })();
   }, []);
 
@@ -78,7 +84,7 @@ export default memo(({ guild, channel, description }) => {
     Synced = isEqual(CategoryChannel.permissionOverwrites, PermissionOverwrites);
   }
 
-  return <Modal size={Modal.Sizes.LARGE}>
+  return <Modal.ModalRoot transitionState={transitionState} size={Modal.ModalSize.LARGE}>
     <HeaderBar className={'P-CPHeaderBar'}>{[
       <GuildIconWrapper style={{ marginRight: '10px', minWidth: '50px' }} guild={guild} size={GuildIconWrapper.Sizes.LARGE} animate={true} />,
       <OverflowTooltip tooltipClassName={'P-CPTooltip'} text={`${guild.name}\n${channel.name}`}><HeaderBar.Title>{`${guild.name} | ${channel.name}`}</HeaderBar.Title></OverflowTooltip>,
@@ -107,5 +113,5 @@ export default memo(({ guild, channel, description }) => {
         <div className={layoutStyle}>{PermissionsForms}</div>
       </AdvancedScrollerThin>
     </Flex>
-  </Modal>;
+  </Modal.ModalRoot>;
 });

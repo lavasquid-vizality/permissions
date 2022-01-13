@@ -1,8 +1,10 @@
 import React, { memo, useState, useEffect } from 'react';
-import { Modal } from '@vizality/components';
 import { getModule } from '@vizality/webpack';
 import { sleep } from '@vizality/util/time';
 
+import { Class } from '../constants';
+
+const Modal = getModule(m => m.ModalRoot);
 const Flex = getModule(m => m.displayName === 'Flex');
 const { AdvancedScrollerThin } = getModule(m => m.AdvancedScrollerThin);
 const HeaderBar = getModule(m => m.displayName === 'HeaderBar');
@@ -13,18 +15,19 @@ const { PermissionsList } = getModule(m => m.default && m.PermissionsList);
 const { generateGuildPermissionSpec } = getModule(m => m.generateGuildPermissionSpec && m.generateChannelPermissionSpec);
 
 const { clearButtonWrapper } = getModule('clearButtonWrapper');
-// const { icon } = getModule(m => m.icon && m.title && Object.keys(m).length === 2);
-const { infoScroller } = getModule('infoScroller');
+const { icon } = getModule(m => m.icon && m.title && Object.keys(m).length === 2);
 const { row, roleDot, roleName } = getModule('row', 'roleName');
 const { colorInteractiveActive } = getModule('colorInteractiveActive');
 const { size14 } = getModule('size14', 'size32');
 
-export default memo(({ guild, description }) => {
+export default memo(({ transitionState, guild, description }) => {
+  const { infoScroller } = getModule('infoScroller') ?? Class.infoScroller;
+
   useEffect(() => {
     (async () => {
       await sleep(1);
       document.querySelector(`.P-GPScroller .${clearButtonWrapper}`)?.style.setProperty('display', 'none');
-      document.querySelectorAll(`.P-GPScroller .icon-17zDF5`).forEach(icon => icon.style.setProperty('display', 'none'));
+      document.querySelectorAll(`.P-GPScroller .${icon}`).forEach(icon => icon.style.setProperty('display', 'none'));
     })();
   }, []);
 
@@ -37,7 +40,7 @@ export default memo(({ guild, description }) => {
     }
   }
 
-  return <Modal size={Modal.Sizes.LARGE}>
+  return <Modal.ModalRoot transitionState={transitionState} size={Modal.ModalSize.LARGE}>
     <Flex style={{ height: '100%' }}>
       <AdvancedScrollerThin className={`${infoScroller} P-GRScroller`} style={{ borderRight: '1px solid var(--background-modifier-accent)', width: `${description ? '100%' : null}` }}>
         <HeaderBar className={'P-GPHeaderBar'}>{[
@@ -57,5 +60,5 @@ export default memo(({ guild, description }) => {
         <PermissionsList guild={guild} locked={true} role={Roles[role]} specs={GuildPermissionSpec} />
       </AdvancedScrollerThin>
     </Flex>
-  </Modal>;
+  </Modal.ModalRoot>;
 });
