@@ -31,5 +31,22 @@ export const Class = {
     emptyIconFriends: 'emptyIconFriends-2LNxTX emptyIcon-uKVxYR',
     emptyIconGuilds: 'emptyIconGuilds-2NNSTU emptyIcon-uKVxYR',
     emptyIconStreamerMode: 'emptyIconStreamerMode-3P4I-V emptyIcon-uKVxYR'
+  },
+  xsmallAvatar: {
+    container: 'container-1F0zy0',
+    sidebarHeader: 'sidebarHeader-1rstuK',
+    addRoleIcon: 'addRoleIcon-3bdozK',
+    layoutStyle: 'layoutStyle-3d1mjU',
+    inline: 'inline-Kpwt8f',
+    xsmallAvatar: 'xsmallAvatar-3_wDVZ',
+    sidebarHeaderDefault: 'sidebarHeaderDefault-1BHqHQ sidebarHeader-1rstuK',
+    sidebarHeaderLocked: 'sidebarHeaderLocked-1hSOIw sidebarHeader-1rstuK',
+    username: 'username-1M6dw9',
+    description: 'description-CNp7bS',
+    button: 'button--NQayD',
+    userRowAvatar: 'userRowAvatar-1_vHvb',
+    userRowSubText: 'userRowSubText-yuEaUZ',
+    userRowSubAvatar: 'userRowSubAvatar-SsGWIw',
+    permissionsForm: 'permissionsForm-35gjPz'
   }
 };

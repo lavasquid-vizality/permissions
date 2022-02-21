@@ -1,6 +1,5 @@
 import React, { memo, useState, useEffect } from 'react';
 import { getModule } from '@vizality/webpack';
-import { sleep } from '@vizality/util/time';
 
 import { Class } from '../constants';
 
@@ -15,20 +14,16 @@ const { PermissionsList } = getModule(m => m.default && m.PermissionsList);
 const { generateGuildPermissionSpec } = getModule(m => m.generateGuildPermissionSpec && m.generateChannelPermissionSpec);
 
 const { clearButtonWrapper } = getModule('clearButtonWrapper');
-const { icon } = getModule(m => m.icon && m.title && Object.keys(m).length === 2);
+const { icon } = getModule(m => m.title && m.icon && Object.keys(m).length === 2);
+const { infoScroller } = Class.infoScroller;
 const { row, roleDot, roleName } = getModule('row', 'roleName');
 const { colorInteractiveActive } = getModule('colorInteractiveActive');
 const { size14 } = getModule('size14', 'size32');
 
 export default memo(({ transitionState, guild, description }) => {
-  const { infoScroller } = getModule('infoScroller') ?? Class.infoScroller;
-
   useEffect(() => {
-    (async () => {
-      await sleep(1);
-      document.querySelector(`.P-GPScroller .${clearButtonWrapper}`)?.style.setProperty('display', 'none');
-      document.querySelectorAll(`.P-GPScroller .${icon}`).forEach(icon => icon.style.setProperty('display', 'none'));
-    })();
+    document.querySelector(`.P-GPScroller .${clearButtonWrapper}`)?.style.setProperty('display', 'none');
+    document.querySelectorAll(`.P-GPScroller .${icon}`).forEach(icon => icon.style.setProperty('display', 'none'));
   }, []);
 
   const Roles = guild.roles;
@@ -40,7 +35,7 @@ export default memo(({ transitionState, guild, description }) => {
     }
   }
 
-  return <Modal.ModalRoot transitionState={transitionState} size={Modal.ModalSize.LARGE}>
+  return <Modal.ModalRoot transitionState={transitionState} size={Modal.ModalSize.LARGE} aria-label={'Guild Permissions Modal'}>
     <Flex style={{ height: '100%' }}>
       <AdvancedScrollerThin className={`${infoScroller} P-GRScroller`} style={{ borderRight: '1px solid var(--background-modifier-accent)', width: `${description ? '100%' : null}` }}>
         <HeaderBar className={'P-GPHeaderBar'}>{[
@@ -48,12 +43,11 @@ export default memo(({ transitionState, guild, description }) => {
           <HeaderBar.Title>{guild.name}</HeaderBar.Title>
         ]}</HeaderBar>
         <TabBar orientation={'vertical'} selectedItem={role} onItemSelect={setRole}>{
-          Object.values(Roles).map(role => (
-            <TabBar.Item className={row} id={role.id}>{[
-              <div className={roleDot} style={{ backgroundColor: role.colorString ?? '#99AAB5' }} />,
-              <div className={`${colorInteractiveActive} ${size14} ${roleName}`}>{role.name}</div>
-            ]}</TabBar.Item>
-          ))
+          Object.values(Roles).map(role => <TabBar.Item className={row} id={role.id}>{[
+            <div className={roleDot} style={{ backgroundColor: role.colorString ?? '#99AAB5' }} />,
+            <div className={`${colorInteractiveActive} ${size14} ${roleName}`}>{role.name}</div>
+          ]}</TabBar.Item>
+          )
         }</TabBar>
       </AdvancedScrollerThin>
       <AdvancedScrollerThin className={`${infoScroller} P-GPScroller`}>

@@ -2,7 +2,7 @@ import { patch } from '@vizality/patcher';
 import { getModule } from '@vizality/webpack';
 
 export default (Module, ...PatchArgs) => {
-  if (Module instanceof Function.bind()) {
+  if (Module instanceof Function.bind.constructor) {
     const openContextMenuLazy = patch(getModule(m => m.openContextMenuLazy), 'openContextMenuLazy', args => {
       const _function = args[1];
       args[1] = async (...args) => {

@@ -1,17 +1,17 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Plugin } from '@vizality/entities';
 import { getModule } from '@vizality/webpack';
-import { findInReactTree } from '@vizality/util/react';
-
-import GuildPermissionsModal from './components/GuildPermissionsModal';
-import ChannelPermissionsModal from './components/ChannelPermissionsModal';
 
 import patchContextMenuLazy from './modules/patchContextMenuLazy';
 import { DefaultSettings } from './constants';
 
 const { MenuItem } = getModule(m => m.MenuItem);
+const GuildPermissionsModal = lazy(() => import('./components/GuildPermissionsModal'));
+const ChannelPermissionsModal = lazy(() => import('./components/ChannelPermissionsModal'));
 
+const Constants = getModule(m => m.API_HOST);
 const { openModalLazy } = getModule(m => m.openModalLazy);
+const { getGuild } = getModule(m => m.getGuild);
 
 export default class Permissions extends Plugin {
   start () {
@@ -20,34 +20,39 @@ export default class Permissions extends Plugin {
   }
 
   patch () {
-    patchContextMenuLazy(getModule.bind(this, m => m.default?.displayName === 'GuildContextMenu'), 'default', (args, res) => {
-      const { guild } = args[0];
+    patchContextMenuLazy(getModule.bind(this, m => m.default?.toString().includes('MUTE_SERVER')), 'default', (args, res) => {
+      const guild = args[0];
 
-      findInReactTree(res.props.children, m => m.children?.[m.children.length - 1]?.props.id === 'hide-muted-channels').children.unshift(<MenuItem action={() => openModalLazy(() => ModalArgs => <GuildPermissionsModal {...ModalArgs} guild={guild} description={this.settings.get('GuildPermissionDescription', DefaultSettings.GuildPermissionDescription)} />)} id={'guild-permissions'} label={'View Permissions'} />);
-
-      return res;
+      return [
+        <MenuItem action={() => openModalLazy(() => ModalArgs => <Suspense fallback={null}>
+          <GuildPermissionsModal {...ModalArgs} guild={guild} description={this.settings.get('GuildPermissionDescription', DefaultSettings.GuildPermissionDescription)} />
+        </Suspense>)} id={'guild-permissions'} label={'View Permissions'} />,
+        res
+      ];
     });
 
-    patchContextMenuLazy(getModule.bind(this, m => m.default?.displayName === 'ChannelListTextChannelContextMenu' && m.default.name === 'm'), 'default', (args, res) => {
-      const { guild, channel } = args[0];
+    patchContextMenuLazy(getModule.bind(this, m => m.getMuteSettings), 'default', (args, res) => {
+      const channel = args[0];
+      if (channel.type !== Constants.ChannelTypes.GUILD_TEXT && channel.type !== Constants.ChannelTypes.GUILD_CATEGORY) return res;
+      const guild = getGuild(channel.guild_id);
 
-      findInReactTree(res.props.children, m => m.children?.[m.children.length - 1]?.props.id === 'channel-notifications').children.unshift(<MenuItem action={() => openModalLazy(() => ModalArgs => <ChannelPermissionsModal {...ModalArgs} guild={guild} channel={channel} description={this.settings.get('ChannelPermissionDescription', DefaultSettings.ChannelPermissionDescription)} />)} id={'category-permissions'} label={'View Permissions'} />);
-
-      return res;
+      return [
+        <MenuItem action={() => openModalLazy(() => ModalArgs => <Suspense fallback={null}>{
+          <ChannelPermissionsModal {...ModalArgs} guild={guild} channel={channel} description={this.settings.get('ChannelPermissionDescription', DefaultSettings.ChannelPermissionDescription)} />
+        }</Suspense>)} id={'channel-permissions'} label={'View Permissions'} />,
+        res
+      ];
     });
-    patchContextMenuLazy(getModule.bind(this, m => m.default?.displayName === 'ChannelListTextChannelContextMenu' && m.default.name === 'g'), 'default', (args, res) => {
-      const { guild, channel } = args[0];
+    patchContextMenuLazy(getModule.bind(this, m => m.default?.displayName === 'useChannelHideNamesItem'), 'default', (args, res) => {
+      const channel = args[0];
+      const guild = getGuild(channel.guild_id);
 
-      findInReactTree(res.props.children, m => m.children?.[m.children.length - 1]?.props.id === 'channel-notifications').children.unshift(<MenuItem action={() => openModalLazy(() => ModalArgs => <ChannelPermissionsModal {...ModalArgs} guild={guild} channel={channel} description={this.settings.get('ChannelPermissionDescription', DefaultSettings.ChannelPermissionDescription)} />)} id={'channel-permissions'} label={'View Permissions'} />);
-
-      return res;
-    });
-    patchContextMenuLazy(getModule.bind(this, m => m.default?.displayName === 'ChannelListVoiceChannelContextMenu'), 'default', (args, res) => {
-      const { guild, channel } = args[0];
-
-      findInReactTree(res.props.children, m => m.children?.[0].props.id === 'hide-voice-names').children.push(<MenuItem action={() => openModalLazy(() => ModalArgs => <ChannelPermissionsModal {...ModalArgs} guild={guild} channel={channel} description={this.settings.get('ChannelPermissionDescription', DefaultSettings.ChannelPermissionDescription)} />)} id={'channel-permissions'} label={'View Permissions'} />);
-
-      return res;
+      return [
+        <MenuItem action={() => openModalLazy(() => ModalArgs => <Suspense fallback={null}>{
+          <ChannelPermissionsModal {...ModalArgs} guild={guild} channel={channel} description={this.settings.get('ChannelPermissionDescription', DefaultSettings.ChannelPermissionDescription)} />
+        }</Suspense>)} id={'channel-permissions'} label={'View Permissions'} />,
+        res
+      ];
     });
   }
 }
