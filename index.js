@@ -33,7 +33,7 @@ export default class Permissions extends Plugin {
 
     patchContextMenuLazy(getModule.bind(this, m => m.getMuteSettings), 'default', (args, res) => {
       const channel = args[0];
-      if (channel.type !== Constants.ChannelTypes.GUILD_TEXT && channel.type !== Constants.ChannelTypes.GUILD_CATEGORY) return res;
+      if (Constants.ChannelTypes[channel.type].includes('DM')) return res;
       const guild = getGuild(channel.guild_id);
 
       return [
