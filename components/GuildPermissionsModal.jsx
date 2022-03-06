@@ -11,6 +11,7 @@ const GuildIconWrapper = getModule(m => m.displayName === 'GuildIconWrapper');
 const TabBar = getModule(m => m.displayName === 'TabBar');
 const { PermissionsList } = getModule(m => m.default && m.PermissionsList);
 
+const Constants = getModule(m => m.API_HOST);
 const { generateGuildPermissionSpec } = getModule(m => m.generateGuildPermissionSpec && m.generateChannelPermissionSpec);
 
 const { clearButtonWrapper } = getModule('clearButtonWrapper');
@@ -44,7 +45,7 @@ export default memo(({ transitionState, guild, description }) => {
         ]}</HeaderBar>
         <TabBar orientation={'vertical'} selectedItem={role} onItemSelect={setRole}>{
           Object.values(Roles).map(role => <TabBar.Item className={row} id={role.id}>{[
-            <div className={roleDot} style={{ backgroundColor: role.colorString ?? '#99AAB5' }} />,
+            <div className={roleDot} style={{ backgroundColor: role.colorString ?? `#${Constants.DEFAULT_ROLE_COLOR.toString(16)}` }} />,
             <div className={`${colorInteractiveActive} ${size14} ${roleName}`}>{role.name}</div>
           ]}</TabBar.Item>
           )
