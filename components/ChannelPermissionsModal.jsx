@@ -1,5 +1,6 @@
 import { isEqual } from 'lodash';
 import React, { memo, useState, useEffect } from 'react';
+import { Messages } from '@vizality/i18n';
 import { OverflowTooltip } from '@vizality/components';
 import { getModule } from '@vizality/webpack';
 const { object: { isEmptyObject }, time: { sleep } } = require('@vizality/util');
@@ -96,7 +97,7 @@ export default memo(({ transitionState, guild, channel, description }) => {
     <HeaderBar className={'P-CPHeaderBar'}>{[
       <GuildIconWrapper style={{ marginRight: '10px', minWidth: '50px' }} guild={guild} size={GuildIconWrapper.Sizes.LARGE} animate={true} />,
       <OverflowTooltip tooltipClassName={'P-CPTooltip'} text={`${guild.name}\n${channel.name}`}><HeaderBar.Title>{`${guild.name} | ${channel.name}`}</HeaderBar.Title></OverflowTooltip>,
-      CategoryChannel && SyncStatusCard && <SyncStatusCard icon={SyncIcons[Synced ? 'Synced' : 'Unsynced']} noticeText={Synced ? [ 'Permissions synced with category: ', <strong>{CategoryChannel.name}</strong> ] : 'Permissions not synced with category'} />
+      CategoryChannel && SyncStatusCard && <SyncStatusCard icon={SyncIcons[Synced ? 'Synced' : 'Unsynced']} noticeText={Messages[Synced ? 'CHANNEL_LOCKED_TO_CATEGORY' : 'PERMISSIONS_UNSYNCED'].format({ categoryName: CategoryChannel.name })} />
     ]}</HeaderBar>
     <Flex style={{ height: '0%' }}>
       <AdvancedScrollerThin className={`${infoScroller} P-CRScroller`} style={{ borderRight: '1px solid var(--background-modifier-accent)', width: `${description ? '100%' : null}` }}>
