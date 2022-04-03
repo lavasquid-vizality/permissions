@@ -17,9 +17,7 @@ export default memo(({ guildId, userId }) => {
 
   useEffect(() => {
     if (!User) {
-      (async () => {
-        setUser(await fetchUser(userId));
-      })();
+      Promise.resolve(fetchUser(userId)).then(setUser);
     }
   }, []);
 

@@ -3,7 +3,7 @@ import React, { memo, useState, useEffect } from 'react';
 import { Messages } from '@vizality/i18n';
 import { OverflowTooltip } from '@vizality/components';
 import { getModule } from '@vizality/webpack';
-const { object: { isEmptyObject }, time: { sleep } } = require('@vizality/util');
+const { isEmptyObject } = require('@vizality/util/object');
 
 import DynamicAnimatedAvatar from './DynamicAnimatedAvatar';
 
@@ -62,8 +62,7 @@ export default memo(({ transitionState, guild, channel, description }) => {
       SSCardStyle.setProperty('min-width', 'max-content');
     }
 
-    (async () => {
-      await sleep(1);
+    Promise.resolve().then(() => {
       const HBTitleStyle = document.querySelector(`.P-CPHeaderBar .vz-overflow-tooltip > .${title}`).style;
       if (HBTitleStyle) {
         HBTitleStyle.setProperty('display', 'inline-block');
@@ -72,7 +71,7 @@ export default memo(({ transitionState, guild, channel, description }) => {
         HBTitleStyle.setProperty('vertical-align', 'middle');
         HBTitleStyle.setProperty('padding-right', '8px');
       }
-    })();
+    });
   }, []);
 
   const [ selectedPermissionOverwrites, setSelectedPermissionOverwrites ] = useState(Object.keys(PermissionOverwrites)[0]);
