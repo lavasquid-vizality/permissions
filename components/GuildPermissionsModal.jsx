@@ -27,11 +27,11 @@ export default memo(({ transitionState, guild, description }) => {
     document.querySelectorAll(`.P-GPScroller .${icon}`).forEach(icon => icon.style.setProperty('display', 'none'));
   }, []);
 
-  const Roles = guild.roles;
-  const [ role, setRole ] = useState(Object.keys(Roles)[0]);
-  const GuildPermissionSpec = generateGuildPermissionSpec(guild);
+  const { roles } = guild;
+  const [ role, setRole ] = useState(Object.keys(roles)[0]);
+  const guildPermissionSpec = generateGuildPermissionSpec(guild);
   if (!description) {
-    for (const category of GuildPermissionSpec) {
+    for (const category of guildPermissionSpec) {
       category.permissions = category.permissions.map(permission => ({ ...permission, description: '' }));
     }
   }
@@ -44,7 +44,7 @@ export default memo(({ transitionState, guild, description }) => {
           <HeaderBar.Title>{guild.name}</HeaderBar.Title>
         ]}</HeaderBar>
         <TabBar orientation={'vertical'} selectedItem={role} onItemSelect={setRole}>{
-          Object.values(Roles).map(role => <TabBar.Item className={row} id={role.id}>{[
+          Object.values(roles).map(role => <TabBar.Item className={row} id={role.id}>{[
             <div className={roleDot} style={{ backgroundColor: role.colorString ?? `#${Constants.DEFAULT_ROLE_COLOR.toString(16)}` }} />,
             <div className={`${colorInteractiveActive} ${size14} ${roleName}`}>{role.name}</div>
           ]}</TabBar.Item>
@@ -52,7 +52,7 @@ export default memo(({ transitionState, guild, description }) => {
         }</TabBar>
       </AdvancedScrollerThin>
       <AdvancedScrollerThin className={`${infoScroller} P-GPScroller`}>
-        <PermissionsList guild={guild} locked={true} role={Roles[role]} specs={GuildPermissionSpec} />
+        <PermissionsList guild={guild} locked={true} role={roles[role]} specs={guildPermissionSpec} />
       </AdvancedScrollerThin>
     </Flex>
   </Modal.ModalRoot>;

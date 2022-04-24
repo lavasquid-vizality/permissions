@@ -23,8 +23,11 @@ const SyncIcons = {
   Unsynced: getModule(m => m.displayName === 'Unsynced')
 };
 
+const { makeEveryoneOverwrite } = getModule(m => m.makeEveryoneOverwrite);
 const { generateChannelPermissionSpec } = getModule(m => m.generateGuildPermissionSpec && m.generateChannelPermissionSpec);
 const { getChannel } = getModule(m => m.getChannel && m.hasChannel);
+const { PermissionOverwriteType } = getModule(m => m.PermissionOverwriteType);
+const { getUser } = getModule(m => m.getCurrentUser && m.getUser);
 
 const { empty, emptyIconGuilds, emptyText } = Class.empty;
 const { title } = getModule('title', 'caret');
@@ -42,8 +45,8 @@ export default memo(({ transitionState, guild, channel, description }) => {
   if (!card) ({ card } = getModule(m => m.card && m.label && !m.channelContainer) ?? {});
   if (!role) ({ role } = getModule('role', 'lock') ?? {});
 
-  const PermissionOverwrites = channel.permissionOverwrites;
-  if (isEmptyObject(PermissionOverwrites)) {
+  const { permissionOverwrites } = channel;
+  if (isEmptyObject(permissionOverwrites)) {
     return <Modal.ModalRoot transitionState={transitionState} size={Modal.ModalSize.MEDIUM} aria-label={'Channel Permissions Modal'}>
       <div className={empty}>
         <div className={emptyIconGuilds}></div>
@@ -51,6 +54,7 @@ export default memo(({ transitionState, guild, channel, description }) => {
       </div>
     </Modal.ModalRoot>;
   }
+  if (!permissionOverwrites[guild.id]) permissionOverwrites[guild.id] = makeEveryoneOverwrite(guild.id);
 
   useEffect(() => {
     document.querySelectorAll(`.P-CRScroller .${role}`).forEach(role => role.style.setProperty('box-sizing', 'border-box'));
@@ -74,59 +78,59 @@ export default memo(({ transitionState, guild, channel, description }) => {
     });
   }, []);
 
-  const [ selectedPermissionOverwrites, setSelectedPermissionOverwrites ] = useState(Object.keys(PermissionOverwrites)[0]);
-  const permissionOverwrites = PermissionOverwrites[selectedPermissionOverwrites];
-  const ChannelPermissionSpec = generateChannelPermissionSpec(guild.id, channel.type, true);
-  const PermissionsForms = [];
-  for (const [ index, category ] of Object.entries(ChannelPermissionSpec)) {
+  const [ selectedPermissionId, setSelectedPermissionId ] = useState(guild.id);
+  const everyoneRoleSelected = selectedPermissionId === guild.id;
+  const channelPermissionSpec = generateChannelPermissionSpec(guild.id, channel.type, everyoneRoleSelected);
+  const permissionsForms = [];
+  for (const [ index, category ] of Object.entries(channelPermissionSpec)) {
+    const permissionOverwrite = permissionOverwrites[selectedPermissionId];
     if (!description) {
       category.permissions = category.permissions.map(permission => ({ ...permission, description: '' }));
     }
 
-    PermissionsForms.push(<PermissionsForm className={index !== `${ChannelPermissionSpec.length - 1}` ? marginBottom40 : null} allow={permissionOverwrites.allow} deny={permissionOverwrites.deny} spec={category} onChange={() => void 0} />);
+    permissionsForms.push(<PermissionsForm className={index !== `${channelPermissionSpec.length - 1}` ? marginBottom40 : null} allow={permissionOverwrite.allow} deny={permissionOverwrite.deny} spec={category} onChange={() => void 0} />);
   }
 
-  const CategoryChannel = getChannel(channel.parent_id);
-  let Synced = false;
-  if (CategoryChannel) {
-    Synced = isEqual(CategoryChannel.permissionOverwrites, PermissionOverwrites);
+  const categoryChannel = getChannel(channel.parent_id);
+  let synced = false;
+  if (categoryChannel) {
+    synced = isEqual(categoryChannel.permissionOverwrites, permissionOverwrites);
   }
 
   return <Modal.ModalRoot transitionState={transitionState} size={Modal.ModalSize.LARGE} aria-label={'Channel Permissions Modal'}>
     <HeaderBar className={'P-CPHeaderBar'}>{[
       <GuildIconWrapper style={{ marginRight: '10px', minWidth: '50px' }} guild={guild} size={GuildIconWrapper.Sizes.LARGE} animate={true} />,
       <OverflowTooltip tooltipClassName={'P-CPTooltip'} text={`${guild.name}\n${channel.name}`}><HeaderBar.Title>{`${guild.name} | ${channel.name}`}</HeaderBar.Title></OverflowTooltip>,
-      CategoryChannel && SyncStatusCard && <SyncStatusCard icon={SyncIcons[Synced ? 'Synced' : 'Unsynced']} noticeText={Messages[Synced ? 'CHANNEL_LOCKED_TO_CATEGORY' : 'PERMISSIONS_UNSYNCED'].format({ categoryName: CategoryChannel.name })} />
+      categoryChannel && SyncStatusCard && <SyncStatusCard icon={SyncIcons[synced ? 'Synced' : 'Unsynced']} noticeText={Messages[synced ? 'CHANNEL_LOCKED_TO_CATEGORY' : 'PERMISSIONS_UNSYNCED'].format({ categoryName: categoryChannel.name })} />
     ]}</HeaderBar>
     <Flex style={{ height: '0%' }}>
       <AdvancedScrollerThin className={`${infoScroller} P-CRScroller`} style={{ borderRight: '1px solid var(--background-modifier-accent)', width: `${description ? '100%' : null}` }}>
-        <TabBar orientation={'vertical'} selectedItem={selectedPermissionOverwrites} onItemSelect={setSelectedPermissionOverwrites}>{
-          Object.values(PermissionOverwrites).map(permissionOverwrite => {
-            switch (permissionOverwrite.type) {
-              case 0: {
-                const guildRole = guild.roles[permissionOverwrite.id];
-                return GuildRole
-                  ? <GuildRole id={permissionOverwrite.id} guild={guild} role={guildRole} color={guildRole.colorString}>{guildRole.name}</GuildRole>
-                  : <TabBar.Item id={permissionOverwrite.id} color={guildRole.colorString}>{guildRole.name}</TabBar.Item>;
-              }
-              case 1: {
-                return GuildRole
-                  ? <GuildRole id={permissionOverwrite.id} guild={guild}>
-                    <DynamicAnimatedAvatar guildId={guild.id} userId={permissionOverwrite.id} />
-                  </GuildRole>
-                  : <TabBar.Item id={permissionOverwrite.id}>
-                    <DynamicAnimatedAvatar guildId={guild.id} userId={permissionOverwrite.id} />
-                  </TabBar.Item>;
-              }
-              default: {
-                return null;
-              }
-            }
-          })
-        }</TabBar>
+        <TabBar orientation={'vertical'} selectedItem={selectedPermissionId} onItemSelect={setSelectedPermissionId}>{[
+          [ Object.values(permissionOverwrites).filter(permissionOverwrite => permissionOverwrite.type === PermissionOverwriteType.ROLE)
+            .map(permissionOverwrite => guild.roles[permissionOverwrite.id])
+            .sort((a, b) => b.position - a.position)
+            .map(role => {
+              return GuildRole
+                ? <GuildRole id={role.id} guild={guild} role={role} color={role.colorString}>{role.name}</GuildRole>
+                : <TabBar.Item id={role.id} color={role.colorString}>{role.name}</TabBar.Item>;
+            }) ],
+          [ Object.values(permissionOverwrites).filter(permissionOverwrite => permissionOverwrite.type === PermissionOverwriteType.MEMBER)
+            .map(permissionOverwrite => getUser(permissionOverwrite.id))
+            .filter(permissionOverwrite => permissionOverwrite)
+            .sort((a, b) => a.username.localeCompare(b.username))
+            .map(user => {
+              return GuildRole
+                ? <GuildRole id={user.id} guild={guild}>
+                  <DynamicAnimatedAvatar guildId={guild.id} user={user} />
+                </GuildRole>
+                : <TabBar.Item id={user.id}>
+                  <DynamicAnimatedAvatar guildId={guild.id} user={user} />
+                </TabBar.Item>;
+            }) ]
+        ]}</TabBar>
       </AdvancedScrollerThin>
       <AdvancedScrollerThin className={infoScroller}>
-        <div className={layoutStyle}>{PermissionsForms}</div>
+        <div className={layoutStyle}>{permissionsForms}</div>
       </AdvancedScrollerThin>
     </Flex>
     {!SyncStatusCard && <Modal.ModalFooter>
