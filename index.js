@@ -1,8 +1,9 @@
 import React, { lazy, Suspense } from 'react';
 import { Plugin } from '@vizality/entities';
+import { patch } from '@vizality/patcher';
 import { getModule } from '@vizality/webpack';
 
-import patchContextMenuLazy from './modules/patchContextMenuLazy';
+import getContextMenuLazy from './modules/getContextMenuLazy';
 import { DefaultSettings } from './constants';
 
 const { MenuItem } = getModule(m => m.MenuItem);
@@ -20,7 +21,7 @@ export default class Permissions extends Plugin {
   }
 
   patch () {
-    patchContextMenuLazy(getModule.bind(this, m => m.default?.toString().includes('MUTE_SERVER')), 'default', (args, res) => {
+    getContextMenuLazy(getModule.bind(this, m => m.default?.toString().includes('MUTE_SERVER'))).then(module => patch(module, 'default', (args, res) => {
       const guild = args[0];
 
       return [
@@ -29,9 +30,9 @@ export default class Permissions extends Plugin {
         </Suspense>)} id={'guild-permissions'} label={'View Permissions'} />,
         res
       ];
-    });
+    }));
 
-    patchContextMenuLazy(getModule.bind(this, m => m.getMuteSettings), 'default', (args, res) => {
+    getContextMenuLazy(getModule.bind(this, m => m.getMuteSettings)).then(module => patch(module, 'default', (args, res) => {
       const channel = args[0];
       if (Constants.ChannelTypes[channel.type].includes('DM')) return res;
       const guild = getGuild(channel.guild_id);
@@ -42,8 +43,8 @@ export default class Permissions extends Plugin {
         }</Suspense>)} id={'channel-permissions'} label={'View Permissions'} />,
         res
       ];
-    });
-    patchContextMenuLazy(getModule.bind(this, m => m.default?.displayName === 'useChannelHideNamesItem'), 'default', (args, res) => {
+    }));
+    getContextMenuLazy(getModule.bind(this, m => m.default?.displayName === 'useChannelHideNamesItem')).then(module => patch(module, 'default', (args, res) => {
       const channel = args[0];
       const guild = getGuild(channel.guild_id);
 
@@ -53,6 +54,6 @@ export default class Permissions extends Plugin {
         }</Suspense>)} id={'channel-permissions'} label={'View Permissions'} />,
         res
       ];
-    });
+    }));
   }
 }

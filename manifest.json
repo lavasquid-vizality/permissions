@@ -1,7 +1,7 @@
 {
   "name": "Permissions",
   "description": "Shows a permission modal in guild and channel context menus",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "author": "LavaSquid",
   "license": "MIT"
 }
